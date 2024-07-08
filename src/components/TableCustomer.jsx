@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Table } from "react-bootstrap";
+import axios from "axios";
+import { Button, Stack, Table } from "react-bootstrap";
+import EditData from "./EditData";
 
 function TableCustomer() {
   const [dataCustomers, setDataCustomers] = useState([
@@ -11,40 +13,63 @@ function TableCustomer() {
     },
   ]);
 
+  const [showEditData, setShowEditData] = useState(false);
+  const handleShow = () => {
+    setShowEditData(true);
+  };
+  const handleClose = () => {
+    setShowEditData(false);
+  };
+
   useEffect(() => {
-    const fetchData = () => {
-      try {
-        const res = axios.get("https://dincuyappserver.adaptable.app/api/wifi");
-        const data = res.data;
-
-        setDataCustomers(data);
-      } catch (error) {}
-    };
-
-    fetchData();
+    axios
+      .get("https://dincuyappserver.adaptable.app/api/wifi")
+      .then((response) => {
+        setDataCustomers(response.data);
+        // setLoading(false);
+      })
+      .catch((error) => {
+        // setError(error);
+        // setLoading(false);
+      });
   }, []);
 
   return (
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Nama</th>
-          <th>Alamat MAC</th>
-          <th>Dibuat Pada</th>
-        </tr>
-      </thead>
-      <tbody>
-        {dataCustomers.map((dc, index) => (
+    <>
+      <Table bordered hover size="sm">
+        <thead>
           <tr>
-            <td>{index + 1}</td>
-            <td>{dc.nama}</td>
-            <td>Otto</td>
-            <td>@mdo</td>
+            <th>No</th>
+            <th>Nama Pengguna</th>
+            <th>Alamat MAC Wifi</th>
+            <th>Dibuat Pada</th>
+            <th>Aksi</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {dataCustomers?.map((dc, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{dc.nama}</td>
+              <td>{dc.macAddress}</td>
+              <td>{dc.dibuatPada}</td>
+              <td>
+                <Stack direction="horizontal" gap={2}>
+                  <Button variant="primary" onClick={handleShow}>
+                  <i className="bi bi-pencil"></i>
+                  </Button>
+                  <Button variant="danger" onClick={handleShow}>
+                    <i className="bi bi-trash"></i>
+                  </Button>
+                </Stack>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <EditData show={showEditData} onHide={handleClose} />
+    </>
   );
 }
 
