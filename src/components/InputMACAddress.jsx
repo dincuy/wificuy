@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Stack } from "react-bootstrap";
 
-function InputMACAddress({ valueMACForEdit, setDataEdited, dataEdited }) {
+function InputMACAddress({ setDataForEdit, dataForEdit }) {
   const [valueBlockMAC, setValueBlockMAC] = useState(["", "", "", "", "", ""]);
 
   const [valueMAC, setValueMAC] = useState("");
@@ -14,15 +14,12 @@ function InputMACAddress({ valueMACForEdit, setDataEdited, dataEdited }) {
 
   useEffect(() => {
     setValueMAC(valueBlockMAC.join(":"));
-    setDataEdited({ ...dataEdited, macAddress: valueBlockMAC.join(":") });
+    setDataForEdit({ ...dataForEdit, macAddress: valueBlockMAC.join(":") });
   }, [valueBlockMAC]);
 
   useEffect(() => {
-    if (valueMACForEdit) {
-      setValueBlockMAC(valueMACForEdit.split(":"));
-    }
-  }, [valueMACForEdit]);
-
+    setValueBlockMAC(dataForEdit.macAddress.split(":"));
+  }, []);
 
   return (
     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -35,7 +32,7 @@ function InputMACAddress({ valueMACForEdit, setDataEdited, dataEdited }) {
               type="text"
               className="text-center"
               maxLength="2"
-              value={valueBlockMAC[i]}
+              value={valueBlockMAC[i] || ""}
               onChange={(e) => handleChangeBlockMAC(i, e)}
             />
             {i < 5 && <span>:</span>}

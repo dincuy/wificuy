@@ -2,26 +2,20 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Row, Stack } from "react-bootstrap";
 import InputMACAddress from "./InputMACAddress";
 
-function EditData({ show, onHide, dataPelanggan, handleEditData }) {
-  const [dataEdited, setDataEdited] = useState({
-    nama: "",
-    macAddress: "",
-  });
-
-  const handleChange = (e) => {
-    setDataEdited({ ...dataEdited, nama: e.target.value });
+function EditData({
+  show,
+  handleClose,
+  dataForEdit,
+  setDataForEdit,
+  handleSaveEdit,
+}) {
+  const handleChangeNama = (e) => {
+    setDataForEdit({ ...dataForEdit, nama: e.target.value });
   };
-
-  useEffect(() => {
-    if (dataPelanggan.nama) {
-      setDataEdited({ ...dataEdited, nama: dataPelanggan.nama });
-      console.log("nama ", dataPelanggan.nama);
-    }
-  }, [dataPelanggan.nama]);
 
   return (
     <>
-      <Modal show={show} onHide={onHide}>
+      <Modal show={show} onHide={() => handleClose("edit")}>
         <Modal.Header closeButton>
           <Modal.Title>Modal heading</Modal.Title>
         </Modal.Header>
@@ -31,29 +25,22 @@ function EditData({ show, onHide, dataPelanggan, handleEditData }) {
               <Form.Label>Nama Pengguna</Form.Label>
               <Form.Control
                 type="text"
-                value={dataEdited.nama}
+                value={dataForEdit.nama}
                 placeholder="Nama..."
-                onChange={handleChange}
+                onChange={handleChangeNama}
               />
             </Form.Group>
             <InputMACAddress
-              valueMACForEdit={dataPelanggan.macAddress}
-              setDataEdited={setDataEdited}
-              dataEdited={dataEdited}
+              setDataForEdit={setDataForEdit}
+              dataForEdit={dataForEdit}
             />
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button variant="secondary" onClick={() => handleClose("edit")}>
             Close
           </Button>
-          <Button
-            variant="primary"
-            onClick={(e) => {
-              handleEditData(e, dataEdited);
-              setDataEdited({ nama: "", macAddress: "" });
-            }}
-          >
+          <Button variant="primary" onClick={handleSaveEdit}>
             Save Changes
           </Button>
         </Modal.Footer>

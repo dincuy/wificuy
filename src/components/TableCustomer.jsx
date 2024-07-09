@@ -20,61 +20,63 @@ function TableCustomer() {
     dibuatPada: "",
   });
 
-  const [idForDelete, setIdForDelete] = useState("");
-
-  const [showEditData, setShowEditData] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = (modal) => {
     setDataForEdit({
       _id: "",
       nama: "",
       macAddress: "",
       dibuatPada: "",
     });
-    setShowEditData(false);
+    if (modal === "edit") {
+      setShowEdit(false);
+    } else if (modal === "delete") {
+      setShowDelete(false);
+    }
   };
 
-  const handleShowEditData = (dc) => {
-    setDataForEdit(dc);
-    setShowEditData(true);
-  };
-
-  const handleEditData = (e, dataEdited) => {
+  // Simpan hasil editan
+  const handleSaveEdit = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:3500/api/wifi/${dataForEdit._id}`, dataEdited)
+      .put(`http://localhost:3500/api/wifi/${dataForEdit._id}`, dataForEdit)
       .then((response) => {
         setDataCustomers(
           dataCustomers.map((item) =>
-            item._id === dataPelanggan._id ? { ...item, ...dataEdited } : item
+            item._id === dataForEdit._id ? { ...item, ...dataForEdit } : item
           )
         );
 
-        setShowEditData(false);
+        setShowEdit(false);
+        setDataForEdit({
+          _id: "",
+          nama: "",
+          macAddress: "",
+          dibuatPada: "",
+        });
       })
       .catch((error) => {
         console.error("There was an error updating the data!", error);
       });
   };
 
-  const handleShowDelete = (id) => {
-    setIdForDelete(id);
-    setShowDelete(true);
-  };
-
-  const handleCloseDelete = () => {
-    setShowDelete(false);
-  };
-
-  const handleDeleteDataPelanggan = () => {
+  // Hapus pelanggan wifi
+  const handleDeleteOK = () => {
     axios
-      .delete(`http://localhost:3500/api/wifi/${idForDelete}`)
+      .delete(`http://localhost:3500/api/wifi/${dataForEdit._id}`)
       .then((response) => {
         setDataCustomers(
-          dataCustomers.filter((item) => item._id !== idForDelete)
+          dataCustomers.filter((item) => item._id !== dataForEdit._id)
         );
         setShowDelete(false);
+        setDataForEdit({
+          _id: "",
+          nama: "",
+          macAddress: "",
+          dibuatPada: "",
+        })
       })
       .catch((error) => {
         console.error("There was an error deleting the data!", error);
@@ -117,13 +119,19 @@ function TableCustomer() {
                 <Stack direction="horizontal" gap={2}>
                   <Button
                     variant="primary"
-                    onClick={() => handleShowEditData(dc)}
+                    onClick={() => {
+                      setDataForEdit(dc);
+                      setShowEdit(true);
+                    }}
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
                   <Button
                     variant="danger"
-                    onClick={() => handleShowDelete(dc._id)}
+                    onClick={() => {
+                      setDataForEdit(dc);
+                      setShowDelete(true);
+                    }}
                   >
                     <i className="bi bi-trash"></i>
                   </Button>
@@ -134,16 +142,19 @@ function TableCustomer() {
         </tbody>
       </Table>
 
+      {/* Edit data pelanggan wifi */}
       <EditData
-        show={showEditData}
-        onHide={handleClose}
-        dataPelanggan={dataForEdit}
+        show={showEdit}
+        handleClose={handleClose}
+        dataForEdit={dataForEdit}
+        setDataForEdit={setDataForEdit}
         setDataCustomers={setDataCustomers}
         dataCustomers={dataCustomers}
-        handleEditData={handleEditData}
+        handleSaveEdit={handleSaveEdit}
       />
 
-      <Modal show={showDelete} onHide={handleCloseDelete}>
+      {/* Delete data pelanggan wifi */}
+      <Modal show={showDelete} onHide={() => handleClose("delete")}>
         <Modal.Header closeButton>
           <Modal.Title>Hapus Data Pelanggan Wifi</Modal.Title>
         </Modal.Header>
@@ -151,10 +162,10 @@ function TableCustomer() {
           Apakah Kamu yakin akan menghapus data pelanggan wifi ini?
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseDelete}>
+          <Button variant="secondary" onClick={() => handleClose("delete")}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleDeleteDataPelanggan}>
+          <Button variant="primary" onClick={handleDeleteOK}>
             Yakin Dong!!
           </Button>
         </Modal.Footer>
