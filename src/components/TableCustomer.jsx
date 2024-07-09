@@ -5,10 +5,13 @@ import {
   FormControl,
   InputGroup,
   Modal,
+  OverlayTrigger,
   Stack,
   Table,
+  Tooltip,
 } from "react-bootstrap";
-import EditData from "./EditData";
+import EditDataModal from "./EditDataModal";
+import AddDataModal from "./AddDataModal";
 
 function TableCustomer() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,8 +34,18 @@ function TableCustomer() {
 
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  // copy paste
+  const [copied, setCopied] = useState(false);
 
-  const handleClose = (modal) => {
+  const handleCopy = (macAddress) => {
+    navigator.clipboard.writeText(macAddress);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+  const handleClose = (modal, callback) => {
     setDataForEdit({
       _id: "",
       nama: "",
@@ -43,6 +56,9 @@ function TableCustomer() {
       setShowEdit(false);
     } else if (modal === "delete") {
       setShowDelete(false);
+    } else if (modal === "add") {
+      setShowAdd(false);
+      callback();
     }
   };
 
@@ -69,10 +85,7 @@ function TableCustomer() {
   const handleSaveEdit = (e) => {
     e.preventDefault();
     axios
-      .put(
-        `https://dincuyappserver.adaptable.app/api/wifi/${dataForEdit._id}`,
-        dataForEdit
-      )
+      .put(`${process.env.API_URL}/api/wifi/${dataForEdit._id}`, dataForEdit)
       .then((response) => {
         setDataCustomers(
           dataCustomers.map((item) =>
@@ -96,9 +109,7 @@ function TableCustomer() {
   // Hapus pelanggan wifi
   const handleDeleteOK = () => {
     axios
-      .delete(
-        `https://dincuyappserver.adaptable.app/api/wifi/${dataForEdit._id}`
-      )
+      .delete(`${process.env.API_URL}/api/wifi/${dataForEdit._id}`)
       .then((response) => {
         setDataCustomers(
           dataCustomers.filter((item) => item._id !== dataForEdit._id)
@@ -116,9 +127,24 @@ function TableCustomer() {
       });
   };
 
+  const handleAddData = (e, dc, callback) => {
+    e.preventDefault();
+    axios
+      .post("https://dincuyappserver.adaptable.app/api/wifi", dc)
+      .then((response) => {
+        setDataCustomers([...dataCustomers, response.data]);
+        setShowAdd(false);
+        callback();
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+        console.error("There was an error adding the data!", error);
+      });
+  };
+
   useEffect(() => {
     axios
-      .get("https://dincuyappserver.adaptable.app/api/wifi")
+      .get(`${process.env.API_URL}/api/wifi`)
       .then((response) => {
         setDataCustomers(response.data);
         // setLoading(false);
@@ -133,28 +159,22 @@ function TableCustomer() {
     <>
       <InputGroup className="mb-3 mx-auto" style={{ maxWidth: "500px" }}>
         <FormControl
-          placeholder="Cari..."
+          placeholder="Cari nama pelanggan"
           aria-label="Search"
           value={searchTerm}
           onChange={handleSearch}
         />
       </InputGroup>
       <div className="mb-3">
-        <Button
-          variant="success"
-          onClick={() => {
-            setDataForEdit(dc);
-            setShowEdit(true);
-          }}
-        >
-          Tambah Pelanggan <i class="bi bi-plus-lg"></i>
+        <Button variant="success" onClick={() => setShowAdd(true)}>
+          Tambah Pelanggan <i className="bi bi-plus-lg"></i>
         </Button>
       </div>
       <Table bordered hover size="sm">
         <thead>
           <tr>
             <th>No</th>
-            <th>Nama Pengguna</th>
+            <th>Nama Pelanggan</th>
             <th>Alamat MAC Wifi</th>
             <th>Dibuat Pada</th>
             <th>Aksi</th>
@@ -165,7 +185,23 @@ function TableCustomer() {
             <tr key={index}>
               <td>{index + 1}</td>
               <td>{dc.nama}</td>
-              <td>{dc.macAddress}</td>
+              <td
+                style={{ cursor: "pointer" }}
+                onClick={() => handleCopy(dc.macAddress)}
+              >
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip>
+                      <span>
+                        {copied ? "Berhasil disalin" : "Klik untuk menyalin"}
+                      </span>
+                    </Tooltip>
+                  }
+                >
+                  <span>{dc.macAddress}</span>
+                </OverlayTrigger>
+              </td>
               <td>{dc.dibuatPada}</td>
               <td>
                 <Stack direction="horizontal" gap={2}>
@@ -194,8 +230,15 @@ function TableCustomer() {
         </tbody>
       </Table>
 
+      {/* Tambah data pelanggan */}
+      <AddDataModal
+        show={showAdd}
+        handleClose={handleClose}
+        handleAddData={handleAddData}
+      />
+
       {/* Edit data pelanggan wifi */}
-      <EditData
+      <EditDataModal
         show={showEdit}
         handleClose={handleClose}
         dataForEdit={dataForEdit}
@@ -208,14 +251,14 @@ function TableCustomer() {
       {/* Delete data pelanggan wifi */}
       <Modal show={showDelete} onHide={() => handleClose("delete")}>
         <Modal.Header closeButton>
-          <Modal.Title>Hapus Data Pelanggan Wifi</Modal.Title>
+          <Modal.Title>Hapus Pelanggan Wifi</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           Apakah Kamu yakin akan menghapus data pelanggan wifi ini?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => handleClose("delete")}>
-            Close
+            Ora
           </Button>
           <Button variant="primary" onClick={handleDeleteOK}>
             Yakin Dong!!

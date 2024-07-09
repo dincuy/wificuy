@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Row, Stack } from "react-bootstrap";
 import InputMACAddress from "./InputMACAddress";
 
-function EditData({
+function EditDataModal({
   show,
   handleClose,
   dataForEdit,
@@ -17,12 +17,12 @@ function EditData({
     <>
       <Modal show={show} onHide={() => handleClose("edit")}>
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title>Edit Pelanggan Wifi</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Nama Pengguna</Form.Label>
+              <Form.Label>Nama Pelanggan</Form.Label>
               <Form.Control
                 type="text"
                 value={dataForEdit.nama}
@@ -38,10 +38,10 @@ function EditData({
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => handleClose("edit")}>
-            Close
+            Batal
           </Button>
           <Button variant="primary" onClick={handleSaveEdit}>
-            Save Changes
+            Sipp lahhh!!
           </Button>
         </Modal.Footer>
       </Modal>
@@ -49,4 +49,4 @@ function EditData({
   );
 }
 
-export default EditData;
+export default EditDataModal;

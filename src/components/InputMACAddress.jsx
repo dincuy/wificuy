@@ -12,6 +12,12 @@ function InputMACAddress({ setDataForEdit, dataForEdit }) {
     );
   };
 
+  // menangani copy paste
+  const handlePaste = (e) => {
+    const pasteData = e.clipboardData.getData('text');
+    setValueBlockMAC(pasteData.split(":"));
+  };
+
   useEffect(() => {
     setValueMAC(valueBlockMAC.join(":"));
     setDataForEdit({ ...dataForEdit, macAddress: valueBlockMAC.join(":") });
@@ -32,8 +38,9 @@ function InputMACAddress({ setDataForEdit, dataForEdit }) {
               type="text"
               className="text-center"
               maxLength="2"
-              value={valueBlockMAC[i] || ""}
+              value={valueBlockMAC[i]}
               onChange={(e) => handleChangeBlockMAC(i, e)}
+              onPaste={handlePaste}
             />
             {i < 5 && <span>:</span>}
           </React.Fragment>
