@@ -85,7 +85,7 @@ function TableCustomer() {
   const handleSaveEdit = (e) => {
     e.preventDefault();
     axios
-      .put(`${process.env.API_URL}/api/wifi/${dataForEdit._id}`, dataForEdit)
+      .put(`${import.meta.env.API_URL}/api/wifi/${dataForEdit._id}`, dataForEdit)
       .then((response) => {
         setDataCustomers(
           dataCustomers.map((item) =>
@@ -109,7 +109,7 @@ function TableCustomer() {
   // Hapus pelanggan wifi
   const handleDeleteOK = () => {
     axios
-      .delete(`${process.env.API_URL}/api/wifi/${dataForEdit._id}`)
+      .delete(`${import.meta.env.API_URL}/api/wifi/${dataForEdit._id}`)
       .then((response) => {
         setDataCustomers(
           dataCustomers.filter((item) => item._id !== dataForEdit._id)
@@ -144,7 +144,7 @@ function TableCustomer() {
 
   useEffect(() => {
     axios
-      .get(`${process.env.API_URL}/api/wifi`)
+      .get(`${import.meta.env.API_URL}/api/wifi`)
       .then((response) => {
         setDataCustomers(response.data);
         // setLoading(false);
