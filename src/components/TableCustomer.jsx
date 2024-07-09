@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import 'dotenv/config'
 import axios from "axios";
 import {
   Button,
@@ -86,7 +85,10 @@ function TableCustomer() {
   const handleSaveEdit = (e) => {
     e.preventDefault();
     axios
-      .put(`${process.env.API_URL}api/wifi/${dataForEdit._id}`, dataForEdit)
+      .put(
+        `${import.meta.env.API_URL}api/wifi/${dataForEdit._id}`,
+        dataForEdit
+      )
       .then((response) => {
         setDataCustomers(
           dataCustomers.map((item) =>
@@ -110,7 +112,9 @@ function TableCustomer() {
   // Hapus pelanggan wifi
   const handleDeleteOK = () => {
     axios
-      .delete(`${process.env.API_URL}api/wifi/${dataForEdit._id}`)
+      .delete(
+        `${import.meta.env.API_URL}api/wifi/${dataForEdit._id}`
+      )
       .then((response) => {
         setDataCustomers(
           dataCustomers.filter((item) => item._id !== dataForEdit._id)
@@ -131,7 +135,7 @@ function TableCustomer() {
   const handleAddData = (e, dc, callback) => {
     e.preventDefault();
     axios
-      .post("https://dincuyappserver.adaptable.app/api/wifi", dc)
+      .post(`${import.meta.env.API_URL}api/wifi`, dc)
       .then((response) => {
         setDataCustomers([...dataCustomers, response.data]);
         setShowAdd(false);
@@ -145,7 +149,7 @@ function TableCustomer() {
 
   useEffect(() => {
     axios
-      .get(`${process.env.API_URL}api/wifi`)
+      .get(`${import.meta.env.API_URL}api/wifi`)
       .then((response) => {
         setDataCustomers(response.data);
         // setLoading(false);
