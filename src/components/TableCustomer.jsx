@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Modal, Stack, Table } from "react-bootstrap";
+import {
+  Button,
+  FormControl,
+  InputGroup,
+  Modal,
+  Stack,
+  Table,
+} from "react-bootstrap";
 import EditData from "./EditData";
 
 function TableCustomer() {
+  const [searchTerm, setSearchTerm] = useState("");
   const [dataCustomers, setDataCustomers] = useState([
     {
       _id: "",
@@ -12,6 +20,7 @@ function TableCustomer() {
       dibuatPada: "",
     },
   ]);
+  const [dataCustomersFiltered, setDataCustomersFiltered] = useState(null);
 
   const [dataForEdit, setDataForEdit] = useState({
     _id: "",
@@ -37,11 +46,33 @@ function TableCustomer() {
     }
   };
 
+  // Mencari data
+  const handleSearch = (event) => {
+    const value = event.target.value.toLowerCase();
+    setSearchTerm(value);
+
+    const filteredData = dataCustomers.filter((item) =>
+      item.nama.toLowerCase().includes(value)
+    );
+
+    if (!value) return setDataCustomersFiltered(null);
+
+    setDataCustomersFiltered(filteredData);
+  };
+
+  // tampilkan data
+  const dataDislpay = dataCustomersFiltered
+    ? dataCustomersFiltered
+    : dataCustomers;
+
   // Simpan hasil editan
   const handleSaveEdit = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:3500/api/wifi/${dataForEdit._id}`, dataForEdit)
+      .put(
+        `https://dincuyappserver.adaptable.app/api/wifi/${dataForEdit._id}`,
+        dataForEdit
+      )
       .then((response) => {
         setDataCustomers(
           dataCustomers.map((item) =>
@@ -65,7 +96,9 @@ function TableCustomer() {
   // Hapus pelanggan wifi
   const handleDeleteOK = () => {
     axios
-      .delete(`http://localhost:3500/api/wifi/${dataForEdit._id}`)
+      .delete(
+        `https://dincuyappserver.adaptable.app/api/wifi/${dataForEdit._id}`
+      )
       .then((response) => {
         setDataCustomers(
           dataCustomers.filter((item) => item._id !== dataForEdit._id)
@@ -76,7 +109,7 @@ function TableCustomer() {
           nama: "",
           macAddress: "",
           dibuatPada: "",
-        })
+        });
       })
       .catch((error) => {
         console.error("There was an error deleting the data!", error);
@@ -98,6 +131,25 @@ function TableCustomer() {
 
   return (
     <>
+      <InputGroup className="mb-3 mx-auto" style={{ maxWidth: "500px" }}>
+        <FormControl
+          placeholder="Cari..."
+          aria-label="Search"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </InputGroup>
+      <div className="mb-3">
+        <Button
+          variant="success"
+          onClick={() => {
+            setDataForEdit(dc);
+            setShowEdit(true);
+          }}
+        >
+          Tambah Pelanggan <i class="bi bi-plus-lg"></i>
+        </Button>
+      </div>
       <Table bordered hover size="sm">
         <thead>
           <tr>
@@ -109,7 +161,7 @@ function TableCustomer() {
           </tr>
         </thead>
         <tbody>
-          {dataCustomers?.map((dc, index) => (
+          {dataDislpay?.map((dc, index) => (
             <tr key={index}>
               <td>{index + 1}</td>
               <td>{dc.nama}</td>
