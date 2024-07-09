@@ -86,7 +86,7 @@ function TableCustomer() {
     e.preventDefault();
     axios
       .put(
-        `${import.meta.env.API_URL}api/wifi/${dataForEdit._id}`,
+        `${import.meta.env.VITE_API_URL}api/wifi/${dataForEdit._id}`,
         dataForEdit
       )
       .then((response) => {
@@ -113,7 +113,7 @@ function TableCustomer() {
   const handleDeleteOK = () => {
     axios
       .delete(
-        `${import.meta.env.API_URL}api/wifi/${dataForEdit._id}`
+        `${import.meta.env.VITE_API_URL}api/wifi/${dataForEdit._id}`
       )
       .then((response) => {
         setDataCustomers(
@@ -135,7 +135,7 @@ function TableCustomer() {
   const handleAddData = (e, dc, callback) => {
     e.preventDefault();
     axios
-      .post(`${import.meta.env.API_URL}api/wifi`, dc)
+      .post(`${import.meta.env.VITE_API_URL}api/wifi`, dc)
       .then((response) => {
         setDataCustomers([...dataCustomers, response.data]);
         setShowAdd(false);
@@ -149,7 +149,7 @@ function TableCustomer() {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.API_URL}api/wifi`)
+      .get(`${import.meta.env.VITE_API_URL}api/wifi`)
       .then((response) => {
         setDataCustomers(response.data);
         // setLoading(false);
