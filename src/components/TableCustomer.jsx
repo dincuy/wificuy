@@ -12,8 +12,11 @@ import {
 } from "react-bootstrap";
 import EditDataModal from "./EditDataModal";
 import AddDataModal from "./AddDataModal";
+import Loading from "./Loading";
 
 function TableCustomer() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [dataCustomers, setDataCustomers] = useState([
     {
@@ -24,6 +27,14 @@ function TableCustomer() {
     },
   ]);
   const [dataCustomersFiltered, setDataCustomersFiltered] = useState(null);
+  const [sorteredDataCustomers, setSorteredDataCustomers] = useState([
+    {
+      _id: "",
+      nama: "",
+      macAddress: "",
+      dibuatPada: "",
+    },
+  ]);
 
   const [dataForEdit, setDataForEdit] = useState({
     _id: "",
@@ -45,6 +56,7 @@ function TableCustomer() {
       setCopied(false);
     }, 2000);
   };
+
   const handleClose = (modal, callback) => {
     setDataForEdit({
       _id: "",
@@ -79,22 +91,27 @@ function TableCustomer() {
   // tampilkan data
   const dataDislpay = dataCustomersFiltered
     ? dataCustomersFiltered
-    : dataCustomers;
+    : sorteredDataCustomers;
 
   // Simpan hasil editan
   const handleSaveEdit = (e) => {
     e.preventDefault();
+    // loading true
+    setIsLoading(true);
     axios
       .put(
         `${import.meta.env.VITE_API_URL}api/wifi/${dataForEdit._id}`,
         dataForEdit
       )
       .then((response) => {
-        setDataCustomers(
-          dataCustomers.map((item) =>
-            item._id === dataForEdit._id ? { ...item, ...dataForEdit } : item
-          )
+        const dataUpdated = dataCustomers.map((item) =>
+          item._id === dataForEdit._id ? { ...item, ...dataForEdit } : item
         );
+        setDataCustomers(dataUpdated);
+
+        // loading false
+        setIsLoading(false);
+        localStorage.setItem("dataCustomer", JSON.stringify(dataUpdated));
 
         setShowEdit(false);
         setDataForEdit({
@@ -106,19 +123,24 @@ function TableCustomer() {
       })
       .catch((error) => {
         console.error("There was an error updating the data!", error);
+        // loading false
+        setIsLoading(false);
       });
   };
 
   // Hapus pelanggan wifi
   const handleDeleteOK = () => {
+    setIsLoading(true);
     axios
-      .delete(
-        `${import.meta.env.VITE_API_URL}api/wifi/${dataForEdit._id}`
-      )
+      .delete(`${import.meta.env.VITE_API_URL}api/wifi/${dataForEdit._id}`)
       .then((response) => {
-        setDataCustomers(
-          dataCustomers.filter((item) => item._id !== dataForEdit._id)
+        const dataUpdated = dataCustomers.filter(
+          (item) => item._id !== dataForEdit._id
         );
+        setDataCustomers(dataUpdated);
+        setIsLoading(false);
+        localStorage.setItem("dataCustomer", JSON.stringify(dataUpdated));
+
         setShowDelete(false);
         setDataForEdit({
           _id: "",
@@ -128,37 +150,68 @@ function TableCustomer() {
         });
       })
       .catch((error) => {
+        setIsLoading(false);
         console.error("There was an error deleting the data!", error);
       });
   };
 
   const handleAddData = (e, dc, callback) => {
     e.preventDefault();
+    setIsLoading(true);
     axios
       .post(`${import.meta.env.VITE_API_URL}api/wifi`, dc)
       .then((response) => {
         setDataCustomers([...dataCustomers, response.data]);
+        // loading false
+        setIsLoading(false);
         setShowAdd(false);
         callback();
+
+        localStorage.setItem(
+          "dataCustomer",
+          JSON.stringify([...dataCustomers, response.data])
+        );
       })
       .catch((error) => {
         alert(error.response.data.message);
+        // loading false
+        setIsLoading(false);
         console.error("There was an error adding the data!", error);
       });
   };
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}api/wifi`)
-      .then((response) => {
-        setDataCustomers(response.data);
-        // setLoading(false);
-      })
-      .catch((error) => {
-        // setError(error);
-        // setLoading(false);
-      });
+    const localData = localStorage.getItem("dataCustomer");
+    if (localData) {
+      setDataCustomers(JSON.parse(localData));
+      setIsLoading(false);
+    } else {
+      axios
+        .get(`${import.meta.env.VITE_API_URL}api/wifi`)
+        .then((response) => {
+          setDataCustomers(response.data);
+          setIsLoading(false);
+          localStorage.setItem("dataCustomer", JSON.stringify(response.data));
+        })
+        .catch((error) => {
+          // setError(error);
+          // setLoading(false);
+        });
+    }
   }, []);
+
+  // fungsi mengurutkan data
+  const sortDataByName = (data) => {
+    return data.sort((a, b) => a.nama.localeCompare(b.nama));
+  };
+
+  useEffect(() => {
+    setSorteredDataCustomers(sortDataByName(dataCustomers));
+  }, [dataCustomers]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -175,20 +228,20 @@ function TableCustomer() {
           Tambah Pelanggan <i className="bi bi-plus-lg"></i>
         </Button>
       </div>
-      <Table bordered hover size="sm">
+      <Table responsive bordered hover size="sm" className="position-relative">
         <thead>
           <tr>
-            <th>No</th>
+            <th className="text-center">No</th>
             <th>Nama Pelanggan</th>
             <th>Alamat MAC Wifi</th>
             <th>Dibuat Pada</th>
             <th>Aksi</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="data-tabel">
           {dataDislpay?.map((dc, index) => (
             <tr key={index}>
-              <td>{index + 1}</td>
+              <td className="text-center">{index + 1}</td>
               <td>{dc.nama}</td>
               <td
                 style={{ cursor: "pointer" }}
@@ -210,7 +263,8 @@ function TableCustomer() {
               <td>{dc.dibuatPada}</td>
               <td>
                 <Stack direction="horizontal" gap={2}>
-                  <Button
+                  <span
+                    className="btn-edit-delete blue"
                     variant="primary"
                     onClick={() => {
                       setDataForEdit(dc);
@@ -218,8 +272,9 @@ function TableCustomer() {
                     }}
                   >
                     <i className="bi bi-pencil"></i>
-                  </Button>
-                  <Button
+                  </span>
+                  <span
+                    className="btn-edit-delete red"
                     variant="danger"
                     onClick={() => {
                       setDataForEdit(dc);
@@ -227,7 +282,7 @@ function TableCustomer() {
                     }}
                   >
                     <i className="bi bi-trash"></i>
-                  </Button>
+                  </span>
                 </Stack>
               </td>
             </tr>
