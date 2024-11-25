@@ -239,6 +239,7 @@ function TableCustomer() {
         show={showAdd}
         handleClose={handleClose}
         handleAddData={handleAddData}
+        dataCustomers={dataCustomers}
       />
 
       <EditDataModal

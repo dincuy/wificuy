@@ -1,16 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputMACAddress from "./InputMACAddress";
 import { Button, Form, Modal } from "react-bootstrap";
 
-function AddDataModal({ show, handleClose, handleAddData }) {
+function AddDataModal({ show, handleClose, handleAddData, dataCustomers }) {
   const [customer, setCustomer] = useState({
     nama: "",
-    macAddress: ":::::",
+    alamatMacWifi: ":::::",
   });
 
   const handleChangeNama = (e) => {
     setCustomer({ ...customer, nama: e.target.value });
   };
+
+  const isMacAddressPresent = dataCustomers.some(
+    (item) => item.alamatMacWifi === customer.alamatMacWifi
+  );
 
   return (
     <>
@@ -20,7 +24,7 @@ function AddDataModal({ show, handleClose, handleAddData }) {
           handleClose("add", () => {
             setCustomer({
               nama: "",
-              macAddress: ":::::",
+              alamatMacWifi: ":::::",
             });
           })
         }
@@ -43,6 +47,7 @@ function AddDataModal({ show, handleClose, handleAddData }) {
               setDataForEdit={setCustomer}
               dataForEdit={customer}
             />
+            {isMacAddressPresent && <p>mac addres sudah ada</p>}
           </Form>
         </Modal.Body>
         <Modal.Footer>
@@ -52,7 +57,7 @@ function AddDataModal({ show, handleClose, handleAddData }) {
               handleClose("add", () => {
                 setCustomer({
                   nama: "",
-                  macAddress: ":::::",
+                  alamatMacWifi: ":::::",
                 });
               })
             }
@@ -65,12 +70,14 @@ function AddDataModal({ show, handleClose, handleAddData }) {
               handleAddData(e, customer, () => {
                 setCustomer({
                   nama: "",
-                  macAddress: ":::::",
+                  alamatMacWifi: ":::::",
                 });
               })
             }
             disabled={
-              customer.nama.length < 1 || customer.macAddress.length < 17
+              customer.nama.length < 1 ||
+              customer.alamatMacWifi.length < 17 ||
+              isMacAddressPresent
             }
           >
             Yoi broo

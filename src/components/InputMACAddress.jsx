@@ -20,11 +20,11 @@ function InputMACAddress({ setDataForEdit, dataForEdit }) {
 
   useEffect(() => {
     setValueMAC(valueBlockMAC.join(":"));
-    setDataForEdit({ ...dataForEdit, macAddress: valueBlockMAC.join(":") });
+    setDataForEdit({ ...dataForEdit, alamatMacWifi: valueBlockMAC.join(":") });
   }, [valueBlockMAC]);
 
   useEffect(() => {
-    setValueBlockMAC(dataForEdit.macAddress.split(":"));
+    setValueBlockMAC(dataForEdit.alamatMacWifi.split(":"));
   }, []);
 
   return (
